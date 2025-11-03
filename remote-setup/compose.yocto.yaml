@@ -3,7 +3,7 @@ name: yocto-dev
 services:
   yocto:
     build:
-      context: ./docker-yocto
+      context: ../docker-yocto
       dockerfile: Dockerfile
     image: yocto-dev:v1.0
     pull_policy: never 

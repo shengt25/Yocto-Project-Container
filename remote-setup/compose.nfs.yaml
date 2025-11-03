@@ -3,7 +3,7 @@ name: nfs-server
 services:
   nfs:
     build:
-      context: ./docker-nfs-server
+      context: ../docker-nfs-server
       dockerfile: Dockerfile
     image: nfs-server:v1.0
     pull_policy: never 
