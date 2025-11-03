@@ -14,14 +14,9 @@ services:
       - type: volume
         source: yocto-user
         target: /home/yocto/user
-      - type: volume
-        source: yocto-nfs
-        target: /nfs
 
 volumes:
   yocto-data:
     name: "yocto-data"
-  yocto-nfs:
-    name: "yocto-nfs"
   yocto-user:
     name: "yocto-user"
