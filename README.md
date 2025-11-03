@@ -8,14 +8,16 @@ The target hardware platform is BeagleBone Black.
 
 ### Requirements
 - Docker and Docker Compose installed
-- For Yocto builds: At least 50GB of free disk space
+- For Yocto builds: At least 100GB of free disk space
+- For scripts, they are supported on Linux or macOS. For Windows consider using WSL2, or you can run the containers manually using Docker commands.
   
 ### Overview
 This repository provides a Dockerized development environment consisting of two containers:
 
 1. Yocto Development Environment based on Ubuntu 22.04 with necessary dependencies pre-installed
 2. NFS Server providing root filesystem for the target device over network
-(The NFS server are provided by Repository: https://github.com/obeone/docker-nfs-server)
+
+**Note that we are using NFSv4**, while the labs uses NFSv3. When configuring the NFS mount on the target device, simply change `nfsvers=3` to `nfsvers=4`.
 
 The containers use three Docker volumes for data persistence:
 
@@ -113,3 +115,5 @@ Use `-h` flag for help.
 This project follows Bootlin's Yocto Project training materials.
 
 The NFS server container is based on [obeone/docker-nfs-server](https://github.com/obeone/docker-nfs-server), which is forked and improved upon [ehough/docker-nfs-server](https://github.com/ehough/docker-nfs-server)
+
+The development environment setup is inspired by [antonsaa/yocto-dev](https://gitlab.metropolia.fi/antonsaa/yocto-dev)
