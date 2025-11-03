@@ -33,9 +33,12 @@ RUN sh -c "$(wget -O- https://github.com/deluan/zsh-in-docker/releases/download/
     -p https://github.com/zsh-users/zsh-completions \
     -p https://github.com/zsh-users/zsh-syntax-highlighting
 
-# Configure git, needed for applying patches, and download lab data
+# Configure git, needed for applying patches
 RUN git config --global user.email "yocto@example.com" && \
-    git config --global user.name "yocto" && \
+    git config --global user.name "yocto"
+
+# Create user dir and download Yocto data from Bootlin
+RUN mkdir $HOME/user && \
     wget https://bootlin.com/doc/training/yocto/yocto-labs.tar.xz && \
     tar xvf yocto-labs.tar.xz && rm yocto-labs.tar.xz
 
