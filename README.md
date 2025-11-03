@@ -49,7 +49,7 @@ The details for each option are provided below.
 **Usage:**
 Clone the repository and run the script:
 ```bash
-git clone https://github.com/shengt25/Learn-Yocto-Project.git
+git clone --recursive https://github.com/shengt25/Learn-Yocto-Project.git
 cd Learn-Yocto-Project
 ./run.sh
 ```
@@ -77,7 +77,7 @@ The `/nfs` directory is already mounted inside the Yocto container, so don't wor
 
 Clone the repository and start the Yocto container:
 ```bash
-git clone https://github.com/shengt25/Learn-Yocto-Project.git
+git clone --recursive https://github.com/shengt25/Learn-Yocto-Project.git
 cd Learn-Yocto-Project/remote-setup
 ./run_yocto.sh
 ```
@@ -88,7 +88,7 @@ Then you can build the Yocto images inside the container
 
 Clone the repository and start the NFS server:
 ```bash
-git clone https://github.com/shengt25/Learn-Yocto-Project.git
+git clone --recursive https://github.com/shengt25/Learn-Yocto-Project.git
 cd Learn-Yocto-Project/remote-setup
 ./run_nfs.sh
 ```
