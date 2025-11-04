@@ -39,26 +39,54 @@ update_rootfs() {
     # Because of symlinks, the transferred filename will be different from IMAGE_FILENAME.
     docker exec "$LOCAL_CONTAINER" sh -c "rm -rf $TRANSFER_TMP_DIR && mkdir -p $TRANSFER_TMP_DIR"
 
+    local PART_DIR="${TRANSFER_TMP_DIR}.part"
+    docker exec "$LOCAL_CONTAINER" sh -c "rm -rf $PART_DIR && mkdir -p $PART_DIR"
 
     local TRANSFER_START_TIME
     TRANSFER_START_TIME=$(date +%s)
-    # Transfer the file, follow the symlinks
-    ssh "$REMOTE_HOST" "docker cp -L $REMOTE_CONTAINER:$IMAGE_PATH -" | \
-        docker cp - "$LOCAL_CONTAINER:$TRANSFER_TMP_DIR/"
 
-    # Get the actual transferred filename
-    local TRANSFERRED_FILE
-    TRANSFERRED_FILE=$(docker exec "$LOCAL_CONTAINER" sh -c "ls $TRANSFER_TMP_DIR/*.tar.xz 2>/dev/null | head -1")
+    # Transfer the file to .part directory first, follow the symlinks
+    if ssh "$REMOTE_HOST" "docker cp -L $REMOTE_CONTAINER:$IMAGE_PATH -" | \
+        docker cp - "$LOCAL_CONTAINER:$PART_DIR/"; then
+        echo "Transfer in progress..."
 
-    # Show transferred file size
-    local FILE_SIZE_BYTES
-    FILE_SIZE_BYTES=$(docker exec "$LOCAL_CONTAINER" stat -c%s "$TRANSFERRED_FILE")
-    local FILE_SIZE_MB=$((FILE_SIZE_BYTES / 1024 / 1024))
-    local TRANSFER_END_TIME
-    TRANSFER_END_TIME=$(date +%s)
-    local TRANSFER_DURATION=$((TRANSFER_END_TIME - TRANSFER_START_TIME))
+        # Get the actual transferred filename
+        local TRANSFERRED_FILE
+        TRANSFERRED_FILE=$(docker exec "$LOCAL_CONTAINER" sh -c "ls $PART_DIR/*.tar.xz 2>/dev/null | head -1")
 
-    echo "Transferred: ${FILE_SIZE_MB} MB in ${TRANSFER_DURATION}s"
+        # Check if file was found and is not empty
+        if [[ -z "$TRANSFERRED_FILE" ]]; then
+            echo "Error: No .tar.xz file found after transfer"
+            docker exec "$LOCAL_CONTAINER" rm -rf "$PART_DIR"
+            exit 1
+        fi
+
+        local FILE_SIZE_BYTES
+        FILE_SIZE_BYTES=$(docker exec "$LOCAL_CONTAINER" stat -c%s "$TRANSFERRED_FILE" 2>/dev/null || echo "0")
+
+        if [[ "$FILE_SIZE_BYTES" -eq 0 ]]; then
+            echo "Error: Downloaded file is empty (0 bytes)"
+            docker exec "$LOCAL_CONTAINER" rm -rf "$PART_DIR"
+            exit 1
+        fi
+
+        # Move from .part to actual transfer directory on success
+        docker exec "$LOCAL_CONTAINER" sh -c "mv $PART_DIR/* $TRANSFER_TMP_DIR/ && rmdir $PART_DIR"
+
+        # Update the transferred file path
+        TRANSFERRED_FILE=$(docker exec "$LOCAL_CONTAINER" sh -c "ls $TRANSFER_TMP_DIR/*.tar.xz 2>/dev/null | head -1")
+
+        local FILE_SIZE_MB=$((FILE_SIZE_BYTES / 1024 / 1024))
+        local TRANSFER_END_TIME
+        TRANSFER_END_TIME=$(date +%s)
+        local TRANSFER_DURATION=$((TRANSFER_END_TIME - TRANSFER_START_TIME))
+
+        echo "Transferred: ${FILE_SIZE_MB} MB in ${TRANSFER_DURATION}s"
+    else
+        echo "Error: Transfer failed"
+        docker exec "$LOCAL_CONTAINER" rm -rf "$PART_DIR"
+        exit 1
+    fi
 
     # Confirmation prompt before clearing /nfs
     if [[ "$SKIP_CONFIRM" != "y" ]]; then

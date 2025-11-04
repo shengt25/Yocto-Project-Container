@@ -48,19 +48,38 @@ pull_image() {
     local TRANSFER_START_TIME
     TRANSFER_START_TIME=$(date +%s)
 
-    ssh "$REMOTE_HOST" "docker cp -L $REMOTE_CONTAINER:$IMAGE_PATH -" | tar -xO > "$IMAGE_FILENAME"
+    local PART_FILENAME="${IMAGE_FILENAME}.part"
 
-    local TRANSFER_END_TIME
-    TRANSFER_END_TIME=$(date +%s)
-    local TRANSFER_DURATION=$((TRANSFER_END_TIME - TRANSFER_START_TIME))
+    # Transfer to .part file first
+    if ssh "$REMOTE_HOST" "docker cp -L $REMOTE_CONTAINER:$IMAGE_PATH -" | tar -xO > "$PART_FILENAME"; then
+        echo "Transfer in progress..."
 
-    # Show transferred file size
-    local FILE_SIZE_BYTES
-    FILE_SIZE_BYTES=$(stat -f%z "$IMAGE_FILENAME" 2>/dev/null || stat -c%s "$IMAGE_FILENAME" 2>/dev/null) # -f%z for macOS, -c%s for Linux
-    local FILE_SIZE_MB=$((FILE_SIZE_BYTES / 1024 / 1024))
+        # Check if downloaded file is empty
+        if [[ ! -s "$PART_FILENAME" ]]; then
+            echo "Error: Downloaded file is empty (0 bytes)"
+            rm -f "$PART_FILENAME"
+            exit 1
+        fi
 
-    echo "Transferred: ${FILE_SIZE_MB} MB in ${TRANSFER_DURATION}s"
-    echo "Done! File saved to: $(pwd)/$IMAGE_FILENAME"
+        # Move .part file to final filename on success
+        mv "$PART_FILENAME" "$IMAGE_FILENAME"
+
+        local TRANSFER_END_TIME
+        TRANSFER_END_TIME=$(date +%s)
+        local TRANSFER_DURATION=$((TRANSFER_END_TIME - TRANSFER_START_TIME))
+
+        # Show transferred file size
+        local FILE_SIZE_BYTES
+        FILE_SIZE_BYTES=$(stat -f%z "$IMAGE_FILENAME" 2>/dev/null || stat -c%s "$IMAGE_FILENAME" 2>/dev/null) # -f%z for macOS, -c%s for Linux
+        local FILE_SIZE_MB=$((FILE_SIZE_BYTES / 1024 / 1024))
+
+        echo "Transferred: ${FILE_SIZE_MB} MB in ${TRANSFER_DURATION}s"
+        echo "Done! File saved to: $(pwd)/$IMAGE_FILENAME"
+    else
+        echo "Error: Transfer failed"
+        rm -f "$PART_FILENAME"
+        exit 1
+    fi
 }
 
 main() {
