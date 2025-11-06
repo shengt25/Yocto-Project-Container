@@ -56,14 +56,9 @@ Two options are available:
 1. **Local Setup**: Run both Yocto and NFS containers on the same machine
 2. **Remote Setup**: Run Yocto container on a powerful remote server and NFS container runs locally.
 
-Notes For both option:
-
-- The user and password for Yocto container is `yocto` and `yocto`.
-- The nfs serving directory is mounted at `/nfs` in Yocto container.
-- The nfs container servers NFSv4. On the target board, make sure it is `nfsvers=4`, not `nfsvers=3`, in the `extlinux/extlinux.conf.`
-- You might need to change your firewall settings to open port `2049` for `nfsd`, letting the NFS server accept incoming connections from the target board.
 
 #### Option 1: Local Setup
+
 ```
 ┌───────────────────────────────────────────┐      ┌──────────────┐
 │              Local Machine                │      │  BeagleBone  │
@@ -74,19 +69,21 @@ Notes For both option:
 │                                           │      │              │
 │                                           │      │              │
 └───────────────────────────────────────────┘      └──────────────┘
-```
 
-**Usage:**
+```
 Clone the repository and run the script:
 ```bash
 git clone --recursive https://github.com/shengt25/yocto-docker.git
-cd Learn-Yocto-Project
+cd yocto-docker
 ./run.sh
 ```
 
 This will build and start both Yocto and NFS containers. After that, the Yocto container will be activated in your terminal.
 
+The container will be stopped when you exit the Yocto container terminal. 
+
 #### Option 2: Remote Setup
+
 ```
 ┌─────────────────────┐                   ┌──────────────────┐      ┌──────────────┐
 │  Remote Server      │                   │  Local Machine   │      │  BeagleBone  │
@@ -106,18 +103,20 @@ This will build and start both Yocto and NFS containers. After that, the Yocto c
 Clone the repository and start the Yocto container:
 ```bash
 git clone --recursive https://github.com/shengt25/yocto-docker.git
-cd Learn-Yocto-Project/remote-setup
+cd yocto-docker/remote-setup
 ./run_yocto.sh
 ```
 
 This will build and start Yocto container on the remote server. The container will be activated in your terminal.
+
+The container will be stopped when you exit the Yocto container terminal. 
 
 **On Local Machine:**
 
 Clone the repository and start the NFS server:
 ```bash
 git clone --recursive https://github.com/shengt25/yocto-docker.git
-cd Learn-Yocto-Project/remote-setup
+cd yocto-docker/remote-setup
 ./run_nfs.sh
 ```
 The NFS server container will run in the foreground, press `Ctrl+C` to stop it.
