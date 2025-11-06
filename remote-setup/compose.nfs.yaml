@@ -8,8 +8,7 @@ services:
     image: nfs-server:v1.0
     pull_policy: never 
     container_name: nfs-server
-    cap_add:
-      - SYS_ADMIN
+    privileged: true
     ports:
       - "2049:2049"
     environment:
