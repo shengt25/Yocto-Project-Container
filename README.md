@@ -1,4 +1,4 @@
-# Yocto Containerized
+# Yocto Docker Development Environment
 
 A containerized environment for learning Yocto Project and OpenEmbedded development, based on Bootlin's training materials.
 
