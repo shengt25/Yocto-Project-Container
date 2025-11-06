@@ -27,8 +27,7 @@ services:
     depends_on:
       yocto:
         condition: service_started
-    cap_add:
-      - SYS_ADMIN
+    privileged: true
     ports:
       - "2049:2049"
     environment:
