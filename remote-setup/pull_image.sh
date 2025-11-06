@@ -2,7 +2,7 @@
 set -e
 
 # Some configuration, normally don't need to change
-REMOTE_CONTAINER="yocto-dev-yocto-1"
+REMOTE_CONTAINER="yocto-docker-yocto-1"
 DEFAULT_IMAGE_NAME_PREFIX="core-image-minimal"
 IMAGE_SUFFIX="-beaglebone.rootfs.wic.xz"
 IMAGE_BASE_DIR="/home/yocto/yocto-labs/build/tmp/deploy/images/beaglebone"
